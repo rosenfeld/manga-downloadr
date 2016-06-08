@@ -1,15 +1,23 @@
 require 'digest'
+require 'thread'
 
 module MangaDownloadr
   class DownloadrClient
-    def initialize(domain, config)
-      @domain = domain
+    def self.setup_http_pool(config)
+      @@http_clients = SizedQueue.new(config.download_batch_size)
+      config.download_batch_size.times do
+        http_client = Net::HTTP.new(config.domain)
+        http_client.keep_alive_timeout = 10
+        @@http_clients << http_client
+      end
+    end
+
+    def initialize(config)
       @config = config
-      @http_client = Net::HTTP.new(@domain)
     end
 
     def download_only(uri)
-      @http_client.get(uri, { "User-Agent": USER_AGENT }) if @config.download_only
+      http_get(uri, { "User-Agent": USER_AGENT }) if @config.download_only
     end
 
     def get(uri, &block)
@@ -17,7 +25,7 @@ module MangaDownloadr
       fn = "tmp/#{digest}"
       return block[Nokogiri::HTML(File.read fn)] if !@config.no_cache && File.exists?(fn)
 
-      response = @http_client.get(uri, { "User-Agent": USER_AGENT })
+      response = http_get(uri, { "User-Agent": USER_AGENT })
       case response.code
       when "301"
         get response.headers["Location"], &block
@@ -37,6 +45,13 @@ module MangaDownloadr
     end
 
     protected
+
+    def http_get(*args)
+      http_client = @@http_clients.pop
+      http_client.get *args
+    ensure
+      @@http_clients << http_client
+    end
 
     def uri_digest(uri)
       Digest::SHA256.hexdigest uri.to_s

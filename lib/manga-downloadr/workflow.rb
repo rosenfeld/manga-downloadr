@@ -4,6 +4,8 @@ module MangaDownloadr
       FileUtils.mkdir_p config.download_directory
       FileUtils.mkdir_p 'tmp'
 
+      DownloadrClient.setup_http_pool config
+
       CM(Workflow, config).
         fetch_chapters.
         fetch_pages(config).
@@ -18,7 +20,7 @@ module MangaDownloadr
 
     def self.fetch_chapters(config)
       puts "Fetching chapters ..."
-      chapters = Chapters.new(config.domain, config).fetch
+      chapters = Chapters.new(config).fetch
       puts "Number of Chapters: #{chapters&.size}"
       chapters
     end
