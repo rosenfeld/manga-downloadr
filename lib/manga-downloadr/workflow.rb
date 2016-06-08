@@ -2,22 +2,23 @@ module MangaDownloadr
   class Workflow
     def self.run(config = Config.new)
       FileUtils.mkdir_p config.download_directory
+      FileUtils.mkdir_p 'tmp'
 
-      CM(Workflow, config)
-        .fetch_chapters
-        .fetch_pages(config)
-        .fetch_images(config)
-        .download_images(config)
-        .optimize_images(config)
-        .prepare_volumes(config)
-        .unwrap
+      CM(Workflow, config).
+        fetch_chapters.
+        fetch_pages(config).
+        fetch_images(config).
+        #download_images(config).
+        #optimize_images(config).
+        #prepare_volumes(config).
+        unwrap
 
       puts "Done!"
     end
 
     def self.fetch_chapters(config)
       puts "Fetching chapters ..."
-      chapters = Chapters.new(config.domain, config.root_uri).fetch
+      chapters = Chapters.new(config.domain, config).fetch
       puts "Number of Chapters: #{chapters&.size}"
       chapters
     end

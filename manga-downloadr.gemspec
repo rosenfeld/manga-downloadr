@@ -21,6 +21,8 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "rspec"
   gem.add_development_dependency "webmock"
   gem.add_development_dependency "pry"
+  gem.add_development_dependency "flamegraph"
+  gem.add_development_dependency "stackprof"
 
   # ensure the gem is built out of versioned files
   gem.files = Dir["Rakefile", "{bin,lib}/**/*", "README*", "LICENSE*"] & `git ls-files -z`.split("\0")

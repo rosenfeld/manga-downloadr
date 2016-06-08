@@ -15,7 +15,7 @@ module MangaDownloadr
 
       collection.each do |item|
         pool.process {
-          engine  = @turn_on_engine ? @engine_klass.new(@config.domain) : nil
+          engine  = @turn_on_engine ? @engine_klass.new(@config.domain, @config) : nil
           reply = block.call(item, engine)&.flatten
           mutex.synchronize do
             results += ( reply || [] )

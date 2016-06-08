@@ -1,4 +1,9 @@
 #!/usr/bin/env ruby
+#require 'flamegraph'
+#require 'stackprof'
+#Flamegraph.generate 'flame-cached.html' do
+#StackProf.run(mode: :cpu, out: 'stackprof-cpu.dump') do
+#StackProf.run(mode: :wall, out: 'stackprof-wall-cached.dump') do
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), "..", "lib")
 require "optparse"
 require "manga-downloadr"
@@ -8,11 +13,27 @@ opt_manga_root_uri   = ""
 opt_batch_size       = 50
 opt_resize_format    = "600x800"
 opt_pages_per_volume = 250
+opt_download_only    = false
+opt_force_processing = false
+opt_no_cache         = false
 
 option_parser = OptionParser.new do |opts|
   # Set a banner, displayed at the top
   # of the help screen.
   opts.banner = "Scraps all the images from all pages of a MangaReader.net manga"
+
+  opts.on( "-D", "--download-only") do
+    opt_download_only = true
+  end
+
+  opts.on( "-P", "--process-only") do
+    opt_force_processing = true
+  end
+
+  opts.on( "-C", "--no-cache") do
+    opt_force_processing = true
+    opt_no_cache = true
+  end
 
   opts.on( "-d DIRECTORY", "--d DIRECTORY", "the directory path where to save the manga" ) do |directory|
     opt_manga_directory = directory
@@ -52,6 +73,8 @@ end
 
 if opt_manga_root_uri.size > 0
   root_uri = URI.parse(opt_manga_root_uri)
-  config = MangaDownloadr::Config.new(root_uri.host, root_uri.path, opt_manga_directory, opt_batch_size, opt_resize_format, opt_pages_per_volume)
+  config = MangaDownloadr::Config.new(root_uri.host, root_uri.path, opt_manga_directory, opt_batch_size, opt_resize_format, opt_pages_per_volume, opt_download_only, opt_force_processing, opt_no_cache)
   MangaDownloadr::Workflow.run(config)
 end
+#end
+#end
